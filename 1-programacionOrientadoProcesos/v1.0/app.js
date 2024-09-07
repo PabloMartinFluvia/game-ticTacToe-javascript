@@ -10,8 +10,6 @@ function playTicTacToe() {
   } while (isResumed());
 
   function playGame() {
-    const MAX_PLAYERS = 2;
-    const MAX_TOKENS = 3;
     const TOKEN_EMPTY = ` `;
     let tokens = [
       [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
@@ -22,81 +20,16 @@ function playTicTacToe() {
     let winner;
     do {
       writelnTokens(tokens);
-      placeToken(tokens, turn);
-      winner = isTicTacToe(tokens, turn);
+      const MAX_PLAYERS = 2;
+      const BOARD_DIMENSION = 3;
+      placeToken(tokens, turn, MAX_PLAYERS, BOARD_DIMENSION, TOKEN_EMPTY);
+      winner = isTicTacToe(tokens, turn, BOARD_DIMENSION);
       if (!winner) {
-        turn = nextTurn(turn);
+        turn = nextTurn(turn, MAX_PLAYERS);
       }
     } while (!winner);
     writelnTokens(tokens);
     console.writeln(`Victoria para ${getToken(turn)}`);
-
-    function placeToken(tokens, turn) {
-      console.writeln(`Turno para ${getToken(turn)}`);
-      let error;
-      let originRow;
-      let originColumn;
-      const movement = getNumTokens(tokens) === MAX_PLAYERS * MAX_TOKENS;
-      if (movement) {
-        do {
-          originRow = read(`Fila origen`);
-          originColumn = read(`Columna origen`);
-          error = !isOccupied(tokens, originRow, originColumn, turn);
-          if (error) {
-            console.writeln(`No hay una ficha de la propiedad de ${getToken(turn)}`);
-          }
-        } while (error);
-      }
-      let targetRow;
-      let targetColumn;
-      do {
-        targetRow = read(`Fila destino`);
-        targetColumn = read(`Columna destino`);
-        error = !isEmpty(tokens, targetRow, targetColumn);
-        if (error) {
-          console.writeln(`Indique una celda vacía`);
-        }
-      } while (error);
-      if (movement) {
-        tokens[originRow][originColumn] = TOKEN_EMPTY;
-      }
-      tokens[targetRow][targetColumn] = getToken(turn);
-    }
-    
-    function getNumTokens(tokens) {
-      let empties = 0;
-      for (let i = 0; i < tokens.length; i++) {
-        for (let j = 0; j < tokens[i].length; j++) {
-          if (tokens[i][j] === TOKEN_EMPTY) {
-            empties++;
-          }
-        }
-      }
-      return MAX_TOKENS ** 2 - empties;
-    }
-
-    function read(title) {
-      let position;
-      let error;
-      do {
-        position = console.readNumber(`${title}: `);
-        error = position < 1 || 3 < position;
-        if (error) {
-          console.writeln(`Por favor un numero entre 1 y ${MAX_TOKENS} inclusives`)
-        }
-      } while (error);
-      return position - 1;
-    }
-
-    function isEmpty(tokens, row, column) {
-      return tokens[row][column] === TOKEN_EMPTY;
-    }
-
-    function getToken(turn) {
-      const TOKEN_X = `X`;
-      const TOKEN_Y = `Y`;
-      return turn === 0 ? TOKEN_X : TOKEN_Y;
-    }
 
     function writelnTokens(tokens) {
       const HORIZONTAL_SEPARTOR = `-------------`;
@@ -113,15 +46,79 @@ function playTicTacToe() {
       console.writeln(msg);
     }
 
-    function nextTurn(turn) {
-      return (turn + 1) % MAX_PLAYERS;
+    function placeToken(tokens, turn, maxPlayers, boardDimension, tokenEmpty) {
+      console.writeln(`Turno para ${getToken(turn)}`);
+      let error;
+      let originRow;
+      let originColumn;
+      const maxTokensPerPlayer = boardDimension;
+      const movement = countTokens(tokens, tokenEmpty) === maxPlayers * maxTokensPerPlayer;
+      if (movement) {
+        do {
+          originRow = read(`Fila origen`, boardDimension);
+          originColumn = read(`Columna origen`, boardDimension);
+          error = !isOccupied(tokens, originRow, originColumn, turn);
+          if (error) {
+            console.writeln(`No hay una ficha de la propiedad de ${getToken(turn)}`);
+          }
+        } while (error);
+      }
+      let targetRow;
+      let targetColumn;
+      do {
+        targetRow = read(`Fila destino`, boardDimension);
+        targetColumn = read(`Columna destino`, boardDimension);
+        error = !isEmpty(tokens, targetRow, targetColumn, tokenEmpty);
+        if (error) {
+          console.writeln(`Indique una celda vacía`);
+        }
+      } while (error);
+      if (movement) {
+        tokens[originRow][originColumn] = tokenEmpty;
+      }
+      tokens[targetRow][targetColumn] = getToken(turn);
+
+      function countTokens(tokens, tokenEmpty) {
+        let placed = 0;
+        for (let i = 0; i < tokens.length; i++) {
+          for (let j = 0; j < tokens[i].length; j++) {
+            if (tokens[i][j] !== tokenEmpty) {
+              placed++;
+            }
+          }
+        }
+        return placed;
+      }
+
+      function read(title, boardDimension) {
+        let position;
+        let error;
+        do {
+          position = console.readNumber(`${title}: `);
+          error = position < 1 || 3 < position;
+          if (error) {
+            console.writeln(`Por favor un numero entre 1 y ${boardDimension} inclusives`)
+          }
+        } while (error);
+        return position - 1;
+      }
+
+      function isOccupied(tokens, row, column, turn) {
+        return tokens[row][column] === getToken(turn);
+      }
+
+      function isEmpty(tokens, row, column, tokenEmpty) {
+        return tokens[row][column] === tokenEmpty;
+      }
+    }
+    
+    function getToken(turn) {
+      const TOKEN_X = `X`;
+      const TOKEN_Y = `Y`;
+      return turn === 0 ? TOKEN_X : TOKEN_Y;
     }
 
-    function isOccupied(tokens, row, column, turn) {
-      return tokens[row][column] === getToken(turn);
-    }
-
-    function isTicTacToe(tokens, turn) {
+    function isTicTacToe(tokens, turn, maxTokens) {
       let countRows = [0, 0, 0];
       let countColumns = [0, 0, 0];
       let countDiagonal = 0;
@@ -134,24 +131,28 @@ function playTicTacToe() {
             if (i - j === 0) {
               countDiagonal++;
             }
-            if (i + j === MAX_TOKENS - 1) {
+            if (i + j === maxTokens - 1) {
               countInverse++;
             }
           }
         }
       }
-      if (countDiagonal === MAX_TOKENS || countInverse === MAX_TOKENS) {
+      if (countDiagonal === maxTokens || countInverse === maxTokens) {
         return true;
       }
       for (let i = 0; i < countRows.length; i++) {
-        if (countRows[i] === MAX_TOKENS) {
+        if (countRows[i] === maxTokens) {
           return true;
         }
-        if (countColumns[i] === MAX_TOKENS) {
+        if (countColumns[i] === maxTokens) {
           return true;
         }
       }
       return false;
+    }
+
+    function nextTurn(turn, maxPlayers) {
+      return (turn + 1) % maxPlayers;
     }
 
   }
