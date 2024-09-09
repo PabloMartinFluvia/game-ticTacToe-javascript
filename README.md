@@ -17,3 +17,6 @@
 ## Task 1
 * Upgrade basic version [1-v0.0](./1-programacionOrientadoProcesos/v0.0/app.js) to machine version [1-v1.0](./1-programacionOrientadoProcesos/v1.0/app.js) ([requisites](https://github.com/USantaTecla-0-domains/game-ticTacToe/blob/master/1.1.machine/README.md)).  
 * Motivation: practice high order functions.
+### 1-v1.0
+1. Provided code (1-v0.0) refactored: moved some functions to local sopes, many identifiers names changes, none function uses const values declared in superior scopes (all data needed is provided as arguments.), eradicated duplicated code and smell code dataset.
+2. New functionality implemented, trying to avoid duplicated code and homogenize interfaces as maximum.
