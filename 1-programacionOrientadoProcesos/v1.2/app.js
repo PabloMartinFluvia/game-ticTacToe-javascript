@@ -44,12 +44,12 @@ function playTicTacToe() {
         }
       } while (error);
 
-      const machineReadOrigin = machineReadGenerator(isOccupied);
-      const machineReadTarget = machineReadGenerator(isEmpty);
+      const machineReadOrigin = machineReadCoordinateGenerator(isOccupied);
+      const machineReadTarget = machineReadCoordinateGenerator(isEmpty);
       const machineReadFunctions = [machineReadOrigin, machineReadTarget];
       
-      const userReadOrigin = userReadGenerator(isOccupied, 'origen', writelnOriginErrorMsg);
-      const userReadTarget = userReadGenerator(isEmpty, 'destino', writelnTargetErrorMsg);
+      const userReadOrigin = userReadCoordinateGenerator(isOccupied, 'origen', writelnOriginErrorMsg);
+      const userReadTarget = userReadCoordinateGenerator(isEmpty, 'destino', writelnTargetErrorMsg);
       const userReadFunctions = [userReadOrigin, userReadTarget];
 
       return [
@@ -58,7 +58,7 @@ function playTicTacToe() {
         [userReadFunctions, userReadFunctions]
       ][userCount];
 
-      function userReadGenerator(isValid, sufixMsg, writelnErrorMsg) {
+      function userReadCoordinateGenerator(isValid, sufixMsg, writelnErrorMsg) {
         return function (tokens, turn) {
           let row;
           let column;
@@ -96,7 +96,7 @@ function playTicTacToe() {
         console.writeln(`Indique una celda vacía`);
       }
 
-      function machineReadGenerator(isValid) {
+      function machineReadCoordinateGenerator(isValid) {
         return function (tokens, turn) {
           let row;
           let column;
