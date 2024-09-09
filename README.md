@@ -17,6 +17,7 @@
 ## Task 1
 * Upgrade basic version [1-v0.0](./1-programacionOrientadoProcesos/v0.0/app.js) to machine version 1-v1.x ([requisites](https://github.com/USantaTecla-0-domains/game-ticTacToe/blob/master/1.1.machine/README.md)).  
 * Motivation: practice high order functions.
+* Restrictions: use objects is not allowed.
 
 ### [1-v1.0](./1-programacionOrientadoProcesos/v1.0/app.js)
 1. Provided code (1-v0.0) refactored: moved some functions to local sopes, many identifiers names changes, none function uses const values declared in superior scopes (all data needed is provided as arguments.), eradicated duplicated code and smell code dataset.
@@ -30,6 +31,11 @@
   4. Functions for machine has been implemented adapting user's functions. 
 
 ### [1-v1.2](./1-programacionOrientadoProcesos/v1.2/app.js)
-- This version is an upgrade og 1-v1.1
-- Functions userReadOrigin and userReadTarget are created by userReadGenerator. Wich configures this functions via currification.
+- This version is an upgrade of 1-v1.1
+- Functions userReadOrigin and userReadTarget are created by userReadCoordinateGenerator. Wich configures this functions via currification.
 - Idem for machineReadOrigin and machineReadTarget.
+
+### [1-v1.3](./1-programacionOrientadoProcesos/v1.3/app.js)
+- This version is an upgrade of 1-v1.2
+- Functions userReadCoordinateGenerator and machineReadCoordinateGenerator are created by readCoordinateGenerator. Wich configures this functions via currification.
+- Implemented with arrow functions.
