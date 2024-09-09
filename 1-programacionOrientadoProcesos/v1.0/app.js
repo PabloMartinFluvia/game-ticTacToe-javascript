@@ -21,10 +21,9 @@ function playTicTacToe() {
     let turn = 0;
     let winner;
     do {
-      writelnTokens(tokens);      
-      const BOARD_DIMENSION = 3;
-      placeToken(tokens, getToken(turn), BOARD_DIMENSION, TOKEN_EMPTY, readCoordinateArray[turn]);
-      winner = isTicTacToe(tokens, getToken(turn), BOARD_DIMENSION);
+      writelnTokens(tokens);            
+      placeToken(tokens, getToken(turn), TOKEN_EMPTY, readCoordinateArray[turn]);
+      winner = isTicTacToe(tokens, getToken(turn));
       if (!winner) {
         turn = nextTurn(turn, NUM_PLAYERS);
       }
@@ -43,54 +42,62 @@ function playTicTacToe() {
           console.writeln(`Error: number of users must be between [${MIN_USERS}, ${max_players}]`);
         }
       } while (error);
-      let readCoordinateArray = [];
-      for (let i = MIN_USERS; i < userCount; i++) {
-        readCoordinateArray[i] = readUserCoordinate;
-      }
-      for (let i = userCount; i < max_players; i++) {
-        readCoordinateArray[i] = readRandomCoordinate;
-      }
-      return readCoordinateArray;
+      const readCoordinateCombinations = 
+              [
+                 [readRandomCoordinate, readRandomCoordinate],
+                 [readUserCoordinate, readRandomCoordinate],
+                 [readUserCoordinate, readUserCoordinate]
+              ];
+      return readCoordinateCombinations[userCount];
 
-      function readUserCoordinate(tokens, targetToken, boardDimension, coordinateType, errorMsg) {
+      function readUserCoordinate(tokens, token, coordinateType, errorMsg) {
         let coordinate = [];
-        let error;        
+        let error;                
         do {
+          const boardDimension = tokens.length;
           coordinate[0] = readIndex(`Fila ${coordinateType}`, boardDimension);
           coordinate[1] = readIndex(`Columna ${coordinateType}`, boardDimension);
-          error = !isOccupied(tokens, coordinate, targetToken);
+          error = !isOccupied(tokens, coordinate, token);
           if (error) {
             console.writeln(errorMsg);
           }
         } while (error);
         return coordinate;
+
+        function readIndex(title, boardDimension) {
+          let position;
+          let error;
+          do {
+            position = console.readNumber(`${title}: `);
+            error = position < 1 || 3 < position;
+            if (error) {
+              console.writeln(`Por favor un numero entre 1 y ${boardDimension} inclusives`)
+            }
+          } while (error);
+          return position - 1;
+        }
+  
+        function isOccupied(tokens, coordinate, token) {
+          return tokens[coordinate[0]][coordinate[1]] === token;
+        }
       }    
 
-      function readIndex(title, boardDimension) {
-        let position;
-        let error;
-        do {
-          position = console.readNumber(`${title}: `);
-          error = position < 1 || 3 < position;
-          if (error) {
-            console.writeln(`Por favor un numero entre 1 y ${boardDimension} inclusives`)
-          }
-        } while (error);
-        return position - 1;
-      }
+      
 
-      function isOccupied(tokens, coordinate, token) {
-        return tokens[coordinate[0]][coordinate[1]] === token;
-      }
-
-      function readRandomCoordinate(tokens, targetToken, boardDimension) {      
+      function readRandomCoordinate(tokens, token) {      
         let coordinate = [];
         do {          
-          coordinate[0] = parseInt(Math.random()*boardDimension);
-          coordinate[1] = parseInt(Math.random()*boardDimension);
-        } while (!isOccupied(tokens, coordinate, targetToken));
+          const boardDimension = tokens.length;
+          coordinate[0] = getRandomIndex(boardDimension);
+          coordinate[1] = getRandomIndex(boardDimension);
+        } while (!isOccupied(tokens, coordinate, token));
         return coordinate;
-      }                
+
+        function getRandomIndex(boardDimension) {
+          return parseInt(Math.random()*boardDimension);
+        }
+      }      
+
     }
 
     function writelnTokens(tokens) {
@@ -114,16 +121,16 @@ function playTicTacToe() {
       return turn === 0 ? TOKEN_X : TOKEN_Y;
     }
 
-    function placeToken(tokens, token, boardDimension, tokenEmpty, readCoordinate) {
+    function placeToken(tokens, token, tokenEmpty, readCoordinate) {
       console.writeln(`Turno para ${token}`);      
       let originCoordinate = [];
-      const maxTokensPerPlayer = boardDimension;
+      const maxTokensPerPlayer = tokens.length;
       const movementIsRequired = countTokens(tokens, token) ===  maxTokensPerPlayer;
       if (movementIsRequired) {        
-        originCoordinate = readCoordinate(tokens, token, boardDimension, 
+        originCoordinate = readCoordinate(tokens, token,  
                               'origen', `No hay una ficha de la propiedad de ${token}`);        
       }            
-      let targetCoordinate = readCoordinate(tokens, tokenEmpty, boardDimension, 
+      let targetCoordinate = readCoordinate(tokens, tokenEmpty, 
                               'destino', `Indique una celda vacía`);      
       if (movementIsRequired) {
         tokens[originCoordinate[0]][originCoordinate[1]] = tokenEmpty;
@@ -144,33 +151,34 @@ function playTicTacToe() {
 
     }
 
-    function isTicTacToe(tokens, token, maxTokensPerPlayer) {
-      let countRows = [0, 0, 0];
-      let countColumns = [0, 0, 0];
-      let countDiagonal = 0;
-      let countInverse = 0;
+    function isTicTacToe(tokens, token) {
+      const winnerCount = tokens.length;
+      let countInRows = [0, 0, 0];
+      let countInColumns = [0, 0, 0];
+      let countInDiagonal = 0;
+      let countInInverse = 0;
       for (let i = 0; i < tokens.length; i++) {
         for (let j = 0; j < tokens[i].length; j++) {
           if (tokens[i][j] === token) {
-            countRows[i]++;
-            countColumns[j]++;
+            countInRows[i]++;
+            countInColumns[j]++;
             if (i - j === 0) {
-              countDiagonal++;
+              countInDiagonal++;
             }
-            if (i + j === maxTokensPerPlayer - 1) {
-              countInverse++;
+            if (i + j === winnerCount - 1) {
+              countInInverse++;
             }
           }
         }
       }
-      if (countDiagonal === maxTokensPerPlayer || countInverse === maxTokensPerPlayer) {
+      if (countInDiagonal === winnerCount || countInInverse === winnerCount) {
         return true;
       }
-      for (let i = 0; i < countRows.length; i++) {
-        if (countRows[i] === maxTokensPerPlayer) {
+      for (let i = 0; i < countInRows.length; i++) {
+        if (countInRows[i] === winnerCount) {
           return true;
         }
-        if (countColumns[i] === maxTokensPerPlayer) {
+        if (countInColumns[i] === winnerCount) {
           return true;
         }
       }
