@@ -1,5 +1,5 @@
 # game TicTacToe
-- This project has educational purpose.
+- This project has an educational purpose.
 - Src code has been provided during [master of programming and software design](https://escuela.it/masters/master-programacion-diseno-software).
 - Domain Model and version's requisites are [here](https://github.com/USantaTecla-0-domains/game-ticTacToe)
 
@@ -11,6 +11,9 @@
 ## 1 - Process Oriented Programing (POP)
 0. Basic Version with standard functions: [1-v0.0](./1-programacionOrientadoProcesos/v0.0/app.js)
    - -> [Task 1](#task-1)
+
+## 2 - POP with objects as structs/registers/records
+0. Basic Version with functions and data structures (objects without methods): [2-v0.0](./2-POP_structs/v0.0/app.js)
 
 
 # Tasks
