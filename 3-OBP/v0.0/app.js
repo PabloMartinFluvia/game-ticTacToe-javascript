@@ -201,7 +201,7 @@ function initYesNoDialog(question) {
     read : function() {
       let error = false;
       do {
-        answer = console.readString(this.question);
+        this.answer = console.readString(this.question);
         error = !this.isAffirmative() && !this.isNegative();
         if (error) {
           console.writeln(`Por favor, responda "si" o "no"`);
@@ -210,11 +210,11 @@ function initYesNoDialog(question) {
     },
 
     isAffirmative : function(){
-      return answer === `si`;
+      return this.answer === `si`;
     },
 
     isNegative : function(){
-      return answer === `no`;
+      return this.answer === `no`;
     }
   };
 }

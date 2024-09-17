@@ -15,10 +15,12 @@
 ## 2 - POP with objects as structs/registers/records
 0. Basic Version with functions and data structures (objects without methods): [2-v0.0](./2-POP_structs/v0.0/app.js)
 
+## 3 - Object Based Programing (OOP without inheritance neither polymorphism)
+0. Basic Version with objects: [3-v0.0](./3-OBP/v0.0/app.js)
 
 # Tasks
 ## Task 1
-* Upgrade basic version [1-v0.0](./1-programacionOrientadoProcesos/v0.0/app.js) to machine version 1-v1.x ([requisites](https://github.com/USantaTecla-0-domains/game-ticTacToe/blob/master/1.1.machine/README.md)).  
+* Upgrade basic version with POP paradigm [1-v0.0](./1-programacionOrientadoProcesos/v0.0/app.js) to machine version 1-v1.x ([requisites](https://github.com/USantaTecla-0-domains/game-ticTacToe/blob/master/1.1.machine/README.md)).  
 * Motivation: practice high order functions.
 * Restrictions: use objects is not allowed.
 
