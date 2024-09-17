@@ -17,10 +17,10 @@ function playTicTacToe() {
       [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
       [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
       [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY]
-    ];    
+    ];
     let winner;
     let turn = 0;
-    const playersReadFunctions = askGameMode();    
+    const playersReadFunctions = configGame();
     do {
       writelnTokens(tokens);
       placeToken(tokens, turn, playersReadFunctions[turn]);
@@ -32,88 +32,98 @@ function playTicTacToe() {
     writelnTokens(tokens);
     console.writeln(`Victoria para ${getToken(turn)}`);
 
-    function askGameMode() {
-      let userCount;
-      let error;
-      const MIN_USERS = 0;
-      do {
-        userCount = console.readNumber(`Number of users? [${MIN_USERS}, ${MAX_PLAYERS}]:`);
-        error = userCount < MIN_USERS || MAX_PLAYERS < userCount;
-        if (error) {
-          console.writeln(`Error: number of users must be between [${MIN_USERS}, ${MAX_PLAYERS}]`);
-        }
-      } while (error);
-      return configureGameMode(userCount);
+    function configGame() {
+      const userCount = askUserCount();
+      return configGameMode(userCount);
 
-      function configureGameMode(userCount) {
-        const readCoordinateGenerator = (read, errorMsgEnabled) =>
-          (isValidResponse, sufixTitle, writelnErrorMsg) =>
-            (tokens, turn) => {
-              let row;
-              let column;
-              let error;
-              do {
-                row = read(`Fila ${sufixTitle}`);
-                column = read(`Columna ${sufixTitle}`);
-                error = !isValidResponse(tokens, row, column, turn);
-                if (error && errorMsgEnabled) {
-                  writelnErrorMsg(turn);
-                }
-              } while (error);
-              return [row, column];
-            };
+      function askUserCount() {
+        let userCount;
+        let error;
+        const MIN_USERS = 0;
+        do {
+          userCount = console.readNumber(`Number of users? [${MIN_USERS}, ${MAX_PLAYERS}]:`);
+          error = userCount < MIN_USERS || MAX_PLAYERS < userCount;
+          if (error) {
+            console.writeln(`Error: number of users must be between [${MIN_USERS}, ${MAX_PLAYERS}]`);
+          }
+        } while (error);
+        return userCount;
+      }
 
-        const machineReadCoordinateGenerator = readCoordinateGenerator(machineRead, false);
-        const machineReadOrigin = machineReadCoordinateGenerator(isOccupied);
-        const machineReadTarget = machineReadCoordinateGenerator(isEmpty);
-        const machineReadFunctions = [machineReadOrigin, machineReadTarget];
+      function configGameMode(userCount) {
+        const configPlayerMode = getConfigPlayerReadCoordinate();
 
-        const userReadCoordinateGenerator = readCoordinateGenerator(userRead, true);
-        const userReadOrigin = userReadCoordinateGenerator(isOccupied, 'origen', writelnOriginErrorMsg);
-        const userReadTarget = userReadCoordinateGenerator(isEmpty, 'destino', writelnTargetErrorMsg);
-        const userReadFunctions = [userReadOrigin, userReadTarget];
+        const machineConfigCoordinateType = configPlayerMode(getRandomIndex, false);
+        const machineReadOrigin = machineConfigCoordinateType(isOccupied);
+        const machineReadTarget = machineConfigCoordinateType(isEmpty);
+        const machineFunctions = [machineReadOrigin, machineReadTarget];
+
+        const userConfigCoordinateType = configPlayerMode(askIndex, true);
+        const userReadOrigin = userConfigCoordinateType(isOccupied, 'origen', writelnErrorMsgOrigin);
+        const userReadTarget = userConfigCoordinateType(isEmpty, 'destino', writelnErrorMsgTarget);
+        const userFunctions = [userReadOrigin, userReadTarget];
 
         const gameModes = [
-          [machineReadFunctions, machineReadFunctions],
-          [userReadFunctions, machineReadFunctions],
-          [userReadFunctions, userReadFunctions]
+          [machineFunctions, machineFunctions],
+          [userFunctions, machineFunctions],
+          [userFunctions, userFunctions]
         ];
         return gameModes[userCount];
 
-        function machineRead() {
+        function getConfigPlayerReadCoordinate() {
+          return (readIndex, errorMsgEnabled) =>
+            (isValidCoordinate, coordinateType, writelnErrorMsg) =>
+              (tokens, turn) => {
+                let row;
+                let column;
+                let error;
+                do {
+                  row = readIndex(`Fila ${coordinateType}`);
+                  column = readIndex(`Columna ${coordinateType}`);
+                  error = !isValidCoordinate(tokens, row, column, turn);
+                  if (error && errorMsgEnabled) {
+                    writelnErrorMsg(turn);
+                  }
+                } while (error);
+                return [row, column];
+              };
+        }
+
+        function getRandomIndex() {
           return parseInt(Math.random() * MAX_TOKENS);
         }
-  
-        function userRead(title) {
+
+        function askIndex(title) {
+          const MIN_ANSWER = 1;
           let position;
           let error;
           do {
             position = console.readNumber(`${title}: `);
-            error = position < 1 || 3 < position;
+            error = position < MIN_ANSWER || MAX_TOKENS < position;
             if (error) {
-              console.writeln(`Por favor un numero entre 1 y ${MAX_TOKENS} inclusives`)
+              console.writeln(`Por favor un numero entre ${MIN_ANSWER} y ${MAX_TOKENS} inclusives`)
             }
           } while (error);
           return position - 1;
         }
-  
-        function writelnOriginErrorMsg(turn) {
+
+        function writelnErrorMsgOrigin(turn) {
           console.writeln(`No hay una ficha de la propiedad de ${getToken(turn)}`);
         }
-  
-        function writelnTargetErrorMsg() {
+
+        function writelnErrorMsgTarget() {
           console.writeln(`Indique una celda vacía`);
         }
-      }      
+      }
     }
 
     function placeToken(tokens, turn, readFunctions) {
-      console.writeln(`Turno para ${getToken(turn)}`);      
+      console.writeln(`Turno para ${getToken(turn)}`);
       const movement = getNumTokens(tokens) === MAX_PLAYERS * MAX_TOKENS;
       let originCoordinate;
       if (movement) {
         const readOrigin = readFunctions[0];
-        originCoordinate = readOrigin(tokens, turn);        
+        originCoordinate = readOrigin(tokens, turn);
       }
       const readTarget = readFunctions[1];
       const targetCoordinate = readTarget(tokens);
